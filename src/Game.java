@@ -3,14 +3,10 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.*;
 import javafx.scene.control.Button;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 
 import java.util.Objects;
 
@@ -27,6 +23,7 @@ public class Game {
     }
 
     private void setupBoard(BorderPane gamePane) {
+        // Header
         BorderPane topBar = new BorderPane();
         topBar.setPadding(new Insets(20.0));
 
@@ -34,17 +31,20 @@ public class Game {
         title.setFont(loadFont(40));
         topBar.setLeft(title);
 
+        // Player turns
         Label turnLabel = new Label("PLAYER 1'S TURN");
         turnLabel.setFont(loadFont(24));
         BorderPane.setAlignment(turnLabel, Pos.CENTER);
         topBar.setCenter(turnLabel);
 
+        // Timer
         Label timer = new Label("9:59");
         timer.setFont(loadFont(24));
         topBar.setRight(timer);
 
         gamePane.setTop(topBar);
 
+        // Controls
         VBox controls = new VBox();
         controls.setAlignment(Pos.CENTER);
         controls.setPadding(new Insets(30.0));
@@ -65,29 +65,15 @@ public class Game {
         controls.getChildren().addAll(settings, info, exit);
         gamePane.setLeft(controls);
 
-        Image image = new Image(this.getClass().getResourceAsStream("/resources/board.png"));
-        ImageView boardImageView = new ImageView(image);
-        boardImageView.setFitWidth(Constants.BOARD_WIDTH);
-        boardImageView.setFitHeight(Constants.BOARD_HEIGHT);
+        // Board
+        Board board = new Board(gamePane);
 
-        Label leftCount = new Label("32");
-        leftCount.setFont(loadFont(24));
-        leftCount.getStyleClass().add("label-gunn");
-        Label rightCount = new Label("32");
-        rightCount.setFont(loadFont(24));
-        rightCount.getStyleClass().add("label-gunn");
-
-        HBox boardRow = new HBox(20.0);
-        boardRow.setAlignment(Pos.CENTER);
-        boardRow.getChildren().addAll(leftCount, boardImageView, rightCount);
-
-        BorderPane.setAlignment(boardRow, Pos.CENTER);
-        gamePane.setCenter(boardRow);
-
+        // Spacer
         Pane rightSpacer = new Pane();
         rightSpacer.setPrefWidth(94);
         gamePane.setRight(rightSpacer);
 
+        // Start/Restart button
         HBox bottomPane = new HBox();
         bottomPane.setAlignment(Pos.CENTER);
         bottomPane.setPadding(new Insets(18.0));
