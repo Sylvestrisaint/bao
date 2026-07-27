@@ -42,18 +42,20 @@ public class Board {
     private void setupBoardWithPits(BorderPane gamePane) {
         Image image = new Image(this.getClass().getResourceAsStream("/resources/board.png"));
         ImageView boardImageView = new ImageView(image);
-        boardImageView.setFitWidth(Constants.PANE_WIDTH);
+        boardImageView.setFitWidth(Constants.BOARD_WIDTH);
         boardImageView.setFitHeight(Constants.BOARD_HEIGHT);
         boardImageView.setPreserveRatio(true);
 
         this.pitGrid = new GridPane();
         this.pitGrid.setPrefSize(Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);
+        this.pitGrid.setMaxSize(Constants.BOARD_WIDTH, Constants.BOARD_HEIGHT);
 
         for(int row = 0; row < 4; row++) {
             for (int col = 0; col < 8; col++) {
                 Pit pit = new Pit(row, col, 2);
                 pit.getView().setPrefSize(Constants.BOARD_WIDTH / 8.0, Constants.BOARD_HEIGHT / 4.0);
                 this.pitGrid.add(pit.getView(), col, row);
+
                 this.pits[row][col] = pit;
             }
         }
@@ -88,7 +90,7 @@ public class Board {
         private int beadCount;
         private final StackPane view;
         private final ImageView beadImageView;
-        private final Text overflowLabel;
+        private final Label overflowLabel;
         private final Tooltip tooltip;
         private final Circle highlightOverlay;
 
@@ -98,11 +100,13 @@ public class Board {
             this.view = new StackPane();
 
             this.beadImageView = new ImageView();
-            this.beadImageView.setFitWidth(50);
-            this.beadImageView.setFitHeight(50);
+            this.beadImageView.setFitWidth(40);
+            this.beadImageView.setFitHeight(40);
             this.beadImageView.setPreserveRatio(true);
 
-            this.overflowLabel = new Text();
+            this.overflowLabel = new Label();
+            this.overflowLabel.setFont(Game.loadFont(14));
+            this.overflowLabel.setTextFill(Color.BLACK);
             this.overflowLabel.setVisible(false);
 
             this.highlightOverlay = new Circle(28);

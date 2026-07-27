@@ -93,8 +93,8 @@ public class Game {
         return iconImageView;
     }
 
-    private Font loadFont(int size) {
-        Font customFont = Font.loadFont(this.getClass().
+    public static Font loadFont(int size) {
+        Font customFont = Font.loadFont(Game.class.
                 getResourceAsStream("fonts/noot-regular.ttf"),size);
         if (customFont == null) { customFont = Font.getDefault();}
         return customFont;
