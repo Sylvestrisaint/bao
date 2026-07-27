@@ -1,4 +1,5 @@
 import javafx.animation.FadeTransition;
+import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -7,6 +8,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.util.Duration;
+
+import java.util.function.Consumer;
 
 public class Pit {
     private static final int MAX_BEADS = 11;
@@ -24,6 +27,12 @@ public class Pit {
         this.row = row;
         this.col = col;
         this.view = new StackPane();
+        this.view.setOnMouseClicked(event -> {
+            if (this.clickHandler != null) {
+                this.clickHandler.accept(this);
+            }
+        });
+        this.view.setCursor(Cursor.HAND);
 
         this.beadImageView = new ImageView();
         this.beadImageView.setFitWidth(40);
@@ -48,11 +57,19 @@ public class Pit {
     }
 
     public StackPane getView() { return view; }
+    public int getRow() { return this.row; }
+    public int getCol() { return this.col; }
     public int getBeadCount() { return this.beadCount; }
 
     public void setBeadCount(int count) {
         this.beadCount = count;
         this.refreshVisual();
+    }
+
+    private Consumer<Pit> clickHandler;
+
+    public void setOnPitClicked(Consumer<Pit> handler) {
+        this.clickHandler = handler;
     }
 
     public void flashRemoved(int newCount) {
@@ -63,6 +80,10 @@ public class Pit {
     public void flashAdded(int newCount) {
         this.setBeadCount(newCount);
         this.flash(Color.rgb(40, 180, 80, 0.45));
+    }
+
+    public void flashInvalid() {
+        this.flash(Color.GRAY);
     }
 
     private void flash(Color color) {

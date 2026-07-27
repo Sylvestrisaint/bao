@@ -1,3 +1,5 @@
+import javafx.animation.PauseTransition;
+import javafx.animation.SequentialTransition;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
@@ -7,30 +9,47 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.text.Font;
+import javafx.util.Duration;
 
 public class Board {
+    private Game gamePlay;
     private GridPane pitGrid;
     private Pit[][] pits = new Pit[4][8];
+    private boolean isSowInProgress = false;
+    private int currentPlayer = 1;
 
-    public Board(BorderPane gamePane) {
+    public Board(Game gamePlay, BorderPane gamePane) {
+        this.gamePlay = gamePlay;
         this.setupBoardWithPits(gamePane);
     }
 
-    public void sowFrom(int startRow, int startCol) {
+    public void sowFromAnimated(int startRow, int startCol, Duration stepDelay, Runnable onComplete) {
         Pit start = this.pits[startRow][startCol];
         int beadsToSow = start.getBeadCount();
         start.flashRemoved(0);
 
-        int row = startRow, col = startRow;
+        SequentialTransition sequence = new SequentialTransition();
+        int row = startRow, col = startCol;
+
         for (int i = 0; i < beadsToSow; i++) {
             col++;
             if (col >= 8) {
                 col = 0;
                 row = (row + 1) % 4;
             }
-            Pit next = this.pits[row][col];
-            next.flashAdded(next.getBeadCount() + 1);
+
+            final Pit next = this.pits[row][col];
+            PauseTransition step = new PauseTransition(stepDelay);
+            step.setOnFinished(e -> next.flashAdded(next.getBeadCount() + 1));
+            sequence.getChildren().add(step);
         }
+
+        sequence.setOnFinished(e -> {
+            if (onComplete != null) {
+                onComplete.run();
+            }
+        });
+        sequence.play();
     }
 
     private void setupBoardWithPits(BorderPane gamePane) {
@@ -48,6 +67,8 @@ public class Board {
             for (int col = 0; col < 8; col++) {
                 Pit pit = new Pit(row, col, 2);
                 pit.getView().setPrefSize(Constants.BOARD_WIDTH / 8.0, Constants.BOARD_HEIGHT / 4.0);
+                pit.setOnPitClicked(this::handlePitClicked);
+
                 this.pitGrid.add(pit.getView(), col, row);
 
                 this.pits[row][col] = pit;
@@ -74,5 +95,49 @@ public class Board {
 
         BorderPane.setAlignment(boardRow, Pos.CENTER);
         gamePane.setCenter(boardRow);
+    }
+
+    private void handlePitClicked(Pit pit) {
+        if (!gamePlay.gameIsActive() || this.isSowInProgress) {
+            return;
+        }
+
+        if (!this.isValidMove(pit)) {
+            pit.flashInvalid();
+            return;
+        }
+
+        this.isSowInProgress = true;
+
+        this.sowFromAnimated(pit.getRow(), pit.getCol(), Duration.millis(150), () -> {
+            this.isSowInProgress = false;
+            this.checkCaptureRules(pit, pit.getRow(), pit.getCol());
+            this.switchTurn();
+        });
+    }
+
+    private void checkCaptureRules(Pit pit, int lastRow, int lastCol) {
+        if (pit.getBeadCount() != 1) {
+//            this.sowFromAnimated();
+        }
+    }
+
+    private boolean isValidMove(Pit pit) {
+        if (pit.getBeadCount() == 0) {
+            return false;
+        }
+
+        boolean isPlayerOnesRow = pit.getRow() < 2;
+        boolean isPlayerTwosRow = pit.getRow() >= 2;
+
+        if (this.currentPlayer == 1 && !isPlayerOnesRow) return false;
+        if (this.currentPlayer == 2 && !isPlayerTwosRow) return false;
+
+        return true;
+    }
+
+    private void switchTurn() {
+        this.currentPlayer = (this.currentPlayer == 1) ? 2 : 1;
+        gamePlay.switchPlayer("PLAYER " + this.currentPlayer + " 'S TURN");
     }
 }

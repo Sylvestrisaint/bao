@@ -12,6 +12,9 @@ import java.util.Objects;
 
 public class Game {
     private PaneOrganizer paneOrganizer;
+    private Label turnLabel;
+    private boolean isGameActive = false;
+
     public Game(PaneOrganizer paneOrganizer) {
         this.paneOrganizer = paneOrganizer;
         this.setupGame();
@@ -32,7 +35,7 @@ public class Game {
         topBar.setLeft(title);
 
         // Player turns
-        Label turnLabel = new Label("PLAYER 1'S TURN");
+        this.turnLabel = new Label("PLAYER 1'S TURN");
         turnLabel.setFont(loadFont(24));
         BorderPane.setAlignment(turnLabel, Pos.CENTER);
         topBar.setCenter(turnLabel);
@@ -66,7 +69,7 @@ public class Game {
         gamePane.setLeft(controls);
 
         // Board
-        Board board = new Board(gamePane);
+        new Board(this, gamePane);
 
         // Spacer
         Pane rightSpacer = new Pane();
@@ -78,11 +81,20 @@ public class Game {
         bottomPane.setAlignment(Pos.CENTER);
         bottomPane.setPadding(new Insets(18.0));
         Button start = new Button("START");
+        start.setOnAction(actionEvent -> this.isGameActive = true );
         this.styleButton(start);
         bottomPane.getChildren().add(start);
         gamePane.setBottom(bottomPane);
 
         this.paneOrganizer.showScreen(gamePane);
+    }
+
+    public boolean gameIsActive() {
+        return this.isGameActive;
+    }
+
+    public void switchPlayer(String newTurn) {
+        this.turnLabel.setText(newTurn);
     }
 
     private ImageView loadImageView(String path) {
