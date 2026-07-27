@@ -24,12 +24,38 @@ public class Board {
     }
 
     public void sowFromAnimated(int startRow, int startCol, Duration stepDelay, Runnable onComplete) {
+        int scoredBeads = 0;
+
+        if (startRow == 1 || startRow == 2) {
+            Pit oppPitOne;
+            Pit oppPitTwo;
+
+            if (this.currentPlayer == 1) {
+                oppPitOne = this.pits[startRow + 1][startCol];
+                oppPitTwo = this.pits[startRow + 1][startCol];
+            } else {
+                oppPitOne = this.pits[startRow - 1][startCol];
+                oppPitTwo = this.pits[startRow - 1][startCol];
+            }
+
+            if (oppPitOne.getBeadCount() != 0) {
+                scoredBeads = oppPitOne.getBeadCount();
+                oppPitOne.setBeadCount(0);
+            } else if (oppPitTwo.getBeadCount() != 0) {
+                scoredBeads = oppPitTwo.getBeadCount();
+                oppPitTwo.setBeadCount(0);
+            }
+        }
+
         Pit start = this.pits[startRow][startCol];
+        start.setBeadCount(start.getBeadCount() + scoredBeads);
+
         int beadsToSow = start.getBeadCount();
         start.flashRemoved(0);
 
         SequentialTransition sequence = new SequentialTransition();
         int row = startRow, col = startCol;
+        Pit[] lastPitHolder = new Pit[1];
 
         for (int i = 0; i < beadsToSow; i++) {
             col++;
@@ -40,13 +66,26 @@ public class Board {
 
             final Pit next = this.pits[row][col];
             PauseTransition step = new PauseTransition(stepDelay);
-            step.setOnFinished(e -> next.flashAdded(next.getBeadCount() + 1));
+            step.setOnFinished(e -> {
+                next.flashAdded(next.getBeadCount() + 1);
+                lastPitHolder[0] = next;
+            })
+            ;
             sequence.getChildren().add(step);
         }
 
         sequence.setOnFinished(e -> {
             if (onComplete != null) {
-                onComplete.run();
+//                onComplete.run();
+                if (lastPitHolder[0].getBeadCount() != 1) {
+                    sowFromAnimated(lastPitHolder[0].getRow(), lastPitHolder[0].getCol(), Duration.millis(150), ()-> {
+                        this.isSowInProgress = false;
+                        this.switchTurn();
+                    });
+                } else {
+                    onComplete.run();
+                }
+
             }
         });
         sequence.play();
@@ -111,16 +150,22 @@ public class Board {
 
         this.sowFromAnimated(pit.getRow(), pit.getCol(), Duration.millis(150), () -> {
             this.isSowInProgress = false;
-            this.checkCaptureRules(pit, pit.getRow(), pit.getCol());
             this.switchTurn();
+//            this.checkCaptureRules(pit.getRow(), pit.getCol());
         });
     }
 
-    private void checkCaptureRules(Pit pit, int lastRow, int lastCol) {
-        if (pit.getBeadCount() != 1) {
-//            this.sowFromAnimated();
-        }
-    }
+//    private void checkCaptureRules(int lastRow, int lastCol) {
+//        Pit pit = new Pit(lastRow, lastCol);
+//        if (beadCount == 1) {
+//            this.switchTurn();
+//        } else {
+//            this.sowFromAnimated(lastRow, lastCol, Duration.millis(150), () -> {
+//                this.isSowInProgress = false;
+//                this.checkCaptureRules();
+//            });
+//        }
+//    }
 
     private boolean isValidMove(Pit pit) {
         if (pit.getBeadCount() == 0) {
