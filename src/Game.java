@@ -16,6 +16,7 @@ import java.util.Objects;
 
 public class Game {
     private PaneOrganizer paneOrganizer;
+    private Timeline timeline;
     private int timeInMinutes;
     private int timeInSeconds;
     private Label timeLeft;
@@ -122,9 +123,9 @@ public class Game {
                 this.timeLeft.setText(this.timeInMinutes + ":" + this.timeInSeconds);
             }
         });
-        Timeline timeline = new Timeline(timer);
-        timeline.setCycleCount(Timeline.INDEFINITE);
-        timeline.play();
+        this.timeline = new Timeline(timer);
+        this.timeline.setCycleCount(Timeline.INDEFINITE);
+        this.timeline.play();
     }
 
     private void endGame() {}
@@ -134,11 +135,32 @@ public class Game {
         restart.setOnAction(actionEvent -> {
             bottomPane.getChildren().remove(restart);
             bottomPane.getChildren().add(start);
+            this.turnLabel.setText("CLICK START TO BEGIN!");
+            this.timeLeft.setText("10:00");
+            this.timeline.stop();
         });
         restart.setCursor(Cursor.HAND);
         this.styleButton(restart);
-        bottomPane.getChildren().remove(start);
-        bottomPane.getChildren().add(restart);
+        bottomPane.getChildren().clear();
+
+        Button pause = new Button("PAUSE");
+        this.styleButton(pause);
+        pause.setOnAction(actionEvent -> {
+            this.pauseGame(pause);
+        });
+
+        bottomPane.getChildren().addAll(pause, restart);
+    }
+
+    private void pauseGame(Button pause) {
+        if (gameIsActive()) {
+            pause.setText("PLAY");
+            this.timeline.pause();
+        } else {
+            pause.setText("PAUSE");
+            this.timeline.play();
+        }
+        this.isGameActive = !this.isGameActive;
     }
 
     public boolean gameIsActive() {
