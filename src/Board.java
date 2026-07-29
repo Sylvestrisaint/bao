@@ -139,7 +139,7 @@ public class Board {
         sequence.setOnFinished(e -> {
             if (onComplete != null) {
                 if (lastPitHolder[0].getBeadCount() != 1) {
-                    sowFromAnimated(lastPitHolder[0].getRow(), lastPitHolder[0].getCol(), Duration.millis(150), ()-> {
+                    sowFromAnimated(lastPitHolder[0].getRow(), lastPitHolder[0].getCol(), Duration.millis(250), ()-> {
                         this.isSowInProgress = false;
                         this.switchTurn();
                     });
@@ -165,7 +165,7 @@ public class Board {
 
         this.isSowInProgress = true;
 
-        this.sowFromAnimated(pit.getRow(), pit.getCol(), Duration.millis(150), () -> {
+        this.sowFromAnimated(pit.getRow(), pit.getCol(), Duration.millis(250), () -> {
             this.isSowInProgress = false;
             this.switchTurn();
         });
