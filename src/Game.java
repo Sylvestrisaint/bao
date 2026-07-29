@@ -1,3 +1,5 @@
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
@@ -8,11 +10,15 @@ import javafx.scene.layout.*;
 import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.util.Duration;
 
 import java.util.Objects;
 
 public class Game {
     private PaneOrganizer paneOrganizer;
+    private int timeInMinutes;
+    private int timeInSeconds;
+    private Label timeLeft;
     private Label turnLabel;
     private boolean isGameActive = false;
 
@@ -42,9 +48,9 @@ public class Game {
         topBar.setCenter(turnLabel);
 
         // Timer
-        Label timer = new Label("9:59");
-        timer.setFont(loadFont(24));
-        topBar.setRight(timer);
+        this.timeLeft = new Label("10:00");
+        this.timeLeft.setFont(loadFont(24));
+        topBar.setRight(this.timeLeft);
 
         gamePane.setTop(topBar);
 
@@ -84,6 +90,7 @@ public class Game {
         Button start = new Button("START");
         start.setOnAction(actionEvent -> {
             this.isGameActive = true;
+            this.startTimer();
             this.showRestart(start, bottomPane);
             this.switchPlayer("PLAYER 1'S TURN");
         } );
@@ -94,6 +101,33 @@ public class Game {
 
         this.paneOrganizer.showScreen(gamePane);
     }
+
+    private void startTimer() {
+        this.timeInMinutes = 9;
+        this.timeInSeconds = 60;
+        KeyFrame timer = new KeyFrame(Duration.seconds(1), actionEvent -> {
+            if (this.timeInMinutes == 0 && this.timeInSeconds == 0) {
+                this.endGame();
+            }
+
+            if (this.timeInSeconds == 0) {
+                this.timeInSeconds = 60;
+                this.timeInMinutes -= 1;
+            }
+
+            this.timeInSeconds -= 1;
+            if (this.timeInSeconds < 10) {
+                this.timeLeft.setText(this.timeInMinutes + ":0" + this.timeInSeconds);
+            } else {
+                this.timeLeft.setText(this.timeInMinutes + ":" + this.timeInSeconds);
+            }
+        });
+        Timeline timeline = new Timeline(timer);
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+    }
+
+    private void endGame() {}
 
     private void showRestart(Button start, HBox bottomPane) {
         Button restart = new Button("RESTART");
