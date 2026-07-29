@@ -10,8 +10,8 @@ public class App extends Application {
         Scene scene = new Scene(organizer.getRoot(), Constants.PANE_WIDTH, Constants.PANE_HEIGHT);
         scene.getStylesheets().add(this.getClass().getResource("css/style.css").
                 toExternalForm());
-        stage.setMaxWidth(Constants.PANE_WIDTH);
-        stage.setMaxHeight(Constants.PANE_HEIGHT);
+        stage.setMinWidth(Constants.PANE_WIDTH);
+        stage.setMinHeight(Constants.PANE_HEIGHT);
         stage.setScene(scene);
         stage.setTitle("BAO");
 //        Image appIcon = new Image(getClass().getResourceAsStream("resources/icon.png"));

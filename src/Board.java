@@ -4,10 +4,8 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.util.Duration;
 
@@ -63,19 +61,38 @@ public class Board {
         boardStack.getChildren().addAll(boardImageView, pitGrid);
 
         Font customFont = Font.loadFont(this.getClass().
-                getResourceAsStream("fonts/noot-regular.ttf"), 24);
+                getResourceAsStream("fonts/noot-regular.ttf"), 20);
         if (customFont == null) { customFont = Font.getDefault();}
 
+        Region spacer1 = new Region();
+        HBox.setHgrow(spacer1, Priority.ALWAYS);
+
+        HBox labelOneBox = new HBox();
+        labelOneBox.setMaxSize(Constants.BOARD_WIDTH, 50.0);
         this.playerOneCountLabel = new Label(String.valueOf(this.playerOneBeads));
         this.playerOneCountLabel.setFont(customFont);
-        this.playerOneCountLabel.getStyleClass().add("label-gunn");
+        this.playerOneCountLabel.getStyleClass().add("label-one");
+        Label playerOne = new Label("PLAYER 1");
+        playerOne.setTextFill(Color.web(Constants.PLAYER_ONE_COLOR));
+        playerOne.setFont(customFont);
+        labelOneBox.getChildren().addAll(this.playerOneCountLabel, spacer1, playerOne);
+
+        Region spacer2 = new Region();
+        HBox.setHgrow(spacer2, Priority.ALWAYS);
+
+        HBox labelTwoBox = new HBox();
+        labelTwoBox.setMaxSize(Constants.BOARD_WIDTH, 50.0);
         this.playerTwoCountLabel = new Label(String.valueOf(this.playerTwoBeads));
         this.playerTwoCountLabel.setFont(customFont);
-        this.playerTwoCountLabel.getStyleClass().add("label-gunn");
+        this.playerTwoCountLabel.getStyleClass().add("label-two");
+        Label playerTwo = new Label("PLAYER 2");
+        playerTwo.setTextFill(Color.web(Constants.PLAYER_TWO_COLOR));
+        playerTwo.setFont(customFont);
+        labelTwoBox.getChildren().addAll(playerTwo, spacer2, this.playerTwoCountLabel);
 
-        HBox boardRow = new HBox(20.0);
+        VBox boardRow = new VBox(20.0);
         boardRow.setAlignment(Pos.CENTER);
-        boardRow.getChildren().addAll(this.playerOneCountLabel, boardStack, this.playerTwoCountLabel);
+        boardRow.getChildren().addAll(labelOneBox, boardStack, labelTwoBox);
 
         BorderPane.setAlignment(boardRow, Pos.CENTER);
         gamePane.setCenter(boardRow);

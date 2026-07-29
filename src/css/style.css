@@ -19,7 +19,14 @@
     -fx-border-color: transparent;
 }
 
-.label-gunn {
-    -fx-background-color: #e2a868;
-    -fx-label-padding: 8.0;
+.label-one {
+    -fx-background-color: #381e00;
+    -fx-label-padding: 6.0;
+    -fx-text-fill: white;
+}
+
+.label-two {
+    -fx-background-color: #4d0000;
+    -fx-label-padding: 6.0;
+    -fx-text-fill: white;
 }

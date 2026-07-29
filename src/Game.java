@@ -1,5 +1,6 @@
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -35,7 +36,7 @@ public class Game {
         topBar.setLeft(title);
 
         // Player turns
-        this.turnLabel = new Label("PLAYER 1'S TURN");
+        this.turnLabel = new Label("CLICK START TO BEGIN!");
         turnLabel.setFont(loadFont(24));
         BorderPane.setAlignment(turnLabel, Pos.CENTER);
         topBar.setCenter(turnLabel);
@@ -81,7 +82,11 @@ public class Game {
         bottomPane.setAlignment(Pos.CENTER);
         bottomPane.setPadding(new Insets(18.0));
         Button start = new Button("START");
-        start.setOnAction(actionEvent -> this.isGameActive = true );
+        start.setOnAction(actionEvent -> {
+            this.isGameActive = true;
+            this.switchPlayer("PLAYER 1'S TURN");
+        } );
+        start.setCursor(Cursor.HAND);
         this.styleButton(start);
         bottomPane.getChildren().add(start);
         gamePane.setBottom(bottomPane);
