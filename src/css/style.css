@@ -1,7 +1,7 @@
 .full-image-button {
     -fx-background-image: url("/resources/button.png");
     -fx-background-size: 100% 100%;
-    -fx-padding: 24px;
+    -fx-padding: 20px;
     -fx-background-color: transparent;
     -fx-border-color: transparent;
     -fx-background-repeat: no-repeat;

@@ -84,6 +84,7 @@ public class Game {
         Button start = new Button("START");
         start.setOnAction(actionEvent -> {
             this.isGameActive = true;
+            this.showRestart(start, bottomPane);
             this.switchPlayer("PLAYER 1'S TURN");
         } );
         start.setCursor(Cursor.HAND);
@@ -92,6 +93,18 @@ public class Game {
         gamePane.setBottom(bottomPane);
 
         this.paneOrganizer.showScreen(gamePane);
+    }
+
+    private void showRestart(Button start, HBox bottomPane) {
+        Button restart = new Button("RESTART");
+        restart.setOnAction(actionEvent -> {
+            bottomPane.getChildren().remove(restart);
+            bottomPane.getChildren().add(start);
+        });
+        restart.setCursor(Cursor.HAND);
+        this.styleButton(restart);
+        bottomPane.getChildren().remove(start);
+        bottomPane.getChildren().add(restart);
     }
 
     public boolean gameIsActive() {
