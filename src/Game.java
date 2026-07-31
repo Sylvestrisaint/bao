@@ -21,6 +21,7 @@ public class Game {
     private int timeInSeconds;
     private Label timeLeft;
     private Label turnLabel;
+    private int currentPlayer;
     private boolean isGameActive = false;
 
     public Game(PaneOrganizer paneOrganizer) {
@@ -77,7 +78,7 @@ public class Game {
         gamePane.setLeft(controls);
 
         // Board
-        new Board(this, gamePane);
+        Board board = new Board(this, gamePane);
 
         // Spacer
         Pane rightSpacer = new Pane();
@@ -91,9 +92,11 @@ public class Game {
         Button start = new Button("START");
         start.setOnAction(actionEvent -> {
             this.isGameActive = true;
+            this.currentPlayer = 1;
             this.startTimer();
             this.showRestart(start, bottomPane);
-            this.switchPlayer("PLAYER 1'S TURN");
+            this.turnLabel.setText("PLAYER " + this.currentPlayer + "'s TURN");
+            board.flashPits();
         } );
         start.setCursor(Cursor.HAND);
         this.styleButton(start);
@@ -133,17 +136,15 @@ public class Game {
     private void showRestart(Button start, HBox bottomPane) {
         Button restart = new Button("RESTART");
         restart.setOnAction(actionEvent -> {
-            bottomPane.getChildren().remove(restart);
-            bottomPane.getChildren().add(start);
-            this.turnLabel.setText("CLICK START TO BEGIN!");
-            this.timeLeft.setText("10:00");
             this.timeline.stop();
+            this.setupGame();
         });
         restart.setCursor(Cursor.HAND);
         this.styleButton(restart);
         bottomPane.getChildren().clear();
 
         Button pause = new Button("PAUSE");
+        pause.setCursor(Cursor.HAND);
         this.styleButton(pause);
         pause.setOnAction(actionEvent -> {
             this.pauseGame(pause);
@@ -156,8 +157,10 @@ public class Game {
         if (gameIsActive()) {
             pause.setText("PLAY");
             this.timeline.pause();
+            this.turnLabel.setText("GAME PAUSED");
         } else {
             pause.setText("PAUSE");
+            this.turnLabel.setText("PLAYER " + this.currentPlayer + "'S TURN");
             this.timeline.play();
         }
         this.isGameActive = !this.isGameActive;
@@ -167,8 +170,9 @@ public class Game {
         return this.isGameActive;
     }
 
-    public void switchPlayer(String newTurn) {
-        this.turnLabel.setText(newTurn);
+    public void switchPlayer() {
+        this.currentPlayer = (this.currentPlayer == 1) ? 2 : 1;
+        this.turnLabel.setText("PLAYER " + this.currentPlayer +"'S TURN");
     }
 
     private ImageView loadImageView(String path) {

@@ -86,6 +86,10 @@ public class Pit {
         this.flash(Color.GRAY);
     }
 
+    public void flashValid() {
+        this.flash(Color.LIGHTYELLOW);
+    }
+
     private void flash(Color color) {
         this.highlightOverlay.setFill(color);
         this.highlightOverlay.setOpacity(1.0);

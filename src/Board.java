@@ -188,6 +188,22 @@ public class Board {
         });
     }
 
+    public void flashPits() {
+        int rowBoundary;
+        if (this.currentPlayer == 1) {
+            rowBoundary = 2;
+        } else {
+            rowBoundary = 4;
+        }
+        for (int row = rowBoundary - 2; row < rowBoundary; row++) {
+            for (int col = 0; col < 8; col++) {
+                if (pits[row][col].getBeadCount() > 0) {
+                    pits[row][col].flashValid();
+                }
+            }
+        }
+    }
+
     private boolean isValidMove(Pit pit) {
         if (pit.getBeadCount() == 0) {
             return false;
@@ -204,7 +220,7 @@ public class Board {
 
     private void switchTurn() {
         this.currentPlayer = (this.currentPlayer == 1) ? 2 : 1;
-        gamePlay.switchPlayer("PLAYER " + this.currentPlayer + " 'S TURN");
+        gamePlay.switchPlayer();
     }
 
     private void updateBeadCounts(boolean isPlayerOne, int count) {
