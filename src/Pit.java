@@ -86,12 +86,25 @@ public class Pit {
         this.flash(Color.GRAY);
     }
 
+//    public void flashValid() {
+//        this.flash(Color.PINK);
+//    }
+//
     public void flashValid() {
-        this.flash(Color.LIGHTYELLOW);
+        this.highlightOverlay.setFill(Color.TRANSPARENT);
+        this.highlightOverlay.setStroke(Color.LIGHTYELLOW);
+        this.highlightOverlay.setStrokeWidth(3.0);
+        this.highlightOverlay.setOpacity(0.1);
+
+        FadeTransition fade = new FadeTransition(FLASH_DURATION, this.highlightOverlay);
+        fade.setFromValue(0.1);
+        fade.setToValue(0.0);
+        fade.play();
     }
 
     private void flash(Color color) {
         this.highlightOverlay.setFill(color);
+        this.highlightOverlay.setStroke(Color.TRANSPARENT);
         this.highlightOverlay.setOpacity(1.0);
 
         FadeTransition fade = new FadeTransition(FLASH_DURATION, this.highlightOverlay);

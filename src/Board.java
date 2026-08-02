@@ -11,6 +11,9 @@ import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class Board {
     private Game gamePlay;
@@ -221,6 +224,10 @@ public class Board {
     private void switchTurn() {
         this.currentPlayer = (this.currentPlayer == 1) ? 2 : 1;
         gamePlay.switchPlayer();
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        Runnable task = this::flashPits;
+        scheduler.schedule(task, 1, TimeUnit.SECONDS);
+        scheduler.shutdown();
     }
 
     private void updateBeadCounts(boolean isPlayerOne, int count) {
