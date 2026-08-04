@@ -17,6 +17,7 @@ import java.util.Objects;
 public class Game {
     private PaneOrganizer paneOrganizer;
     private Info infoPage;
+    private Button pause;
     private Timeline timeline;
     private int timeInMinutes;
     private int timeInSeconds;
@@ -99,16 +100,22 @@ public class Game {
         back.getStyleClass().add("controls-button");
         back.setCursor(Cursor.HAND);
         back.setGraphic(this.loadImageView("/resources/back.png"));
+        back.setOnAction(actionEvent -> {
+            this.turnLabel.setVisible(true);
+            topBar.setRight(this.timeLeft);
+            bottomPane.setVisible(true);
+            gamePane.setCenter(board.getBoard());
+        });
 
         Button info = new Button();
         info.getStyleClass().add("controls-button");
         info.setCursor(Cursor.HAND);
         info.setOnAction(actionEvent -> {
+            this.pauseGame();
             this.turnLabel.setVisible(false);
-            this.timeLeft.setVisible(false);
             bottomPane.setVisible(false);
             topBar.setRight(back);
-            this.infoPage.showScreen(gamePane);
+            gamePane.setCenter(showInfoPage());
         });
         info.setGraphic(this.loadImageView("/resources/info.png"));
 
@@ -123,6 +130,17 @@ public class Game {
         gamePane.setLeft(controls);
 
         this.paneOrganizer.showScreen(gamePane);
+    }
+
+    private HBox showInfoPage() {
+        HBox infoPane = new HBox();
+        Image image = new Image(this.getClass().getResourceAsStream("/resources/info-page.png"));
+        ImageView infoImageView = new ImageView(image);
+        infoImageView.setFitWidth(Constants.INFO_WIDTH);
+        infoImageView.setFitHeight(Constants.INFO_HEIGHT);
+        infoPane.setAlignment(Pos.CENTER);
+        infoPane.getChildren().add(infoImageView);
+        return infoPane;
     }
 
     private void startTimer() {
@@ -162,23 +180,23 @@ public class Game {
         this.styleButton(restart);
         bottomPane.getChildren().clear();
 
-        Button pause = new Button("PAUSE");
-        pause.setCursor(Cursor.HAND);
+        this.pause = new Button("PAUSE");
+        this.pause.setCursor(Cursor.HAND);
         this.styleButton(pause);
-        pause.setOnAction(actionEvent -> {
-            this.pauseGame(pause);
+        this.pause.setOnAction(actionEvent -> {
+            this.pauseGame();
         });
 
-        bottomPane.getChildren().addAll(pause, restart);
+        bottomPane.getChildren().addAll(this.pause, restart);
     }
 
-    private void pauseGame(Button pause) {
+    private void pauseGame() {
         if (gameIsActive()) {
-            pause.setText("PLAY");
+            this.pause.setText("PLAY");
             this.timeline.pause();
             this.turnLabel.setText("GAME PAUSED");
         } else {
-            pause.setText("PAUSE");
+            this.pause.setText("PAUSE");
             this.turnLabel.setText("PLAYER " + this.currentPlayer + "'S TURN");
             this.timeline.play();
         }

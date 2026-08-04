@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 public class Board {
     private Game gamePlay;
+    private VBox boardRow;
     private Pit[][] pits = new Pit[4][8];
     private final List<int[]> playerOnePath;
     private final List<int[]> playerTwoPath;
@@ -93,12 +94,16 @@ public class Board {
         playerTwo.setFont(customFont);
         labelTwoBox.getChildren().addAll(playerTwo, spacer2, this.playerTwoCountLabel);
 
-        VBox boardRow = new VBox(20.0);
-        boardRow.setAlignment(Pos.CENTER);
-        boardRow.getChildren().addAll(labelOneBox, boardStack, labelTwoBox);
+        this.boardRow = new VBox(20.0);
+        this.boardRow.setAlignment(Pos.CENTER);
+        this.boardRow.getChildren().addAll(labelOneBox, boardStack, labelTwoBox);
 
-        BorderPane.setAlignment(boardRow, Pos.CENTER);
-        gamePane.setCenter(boardRow);
+        BorderPane.setAlignment(this.boardRow, Pos.CENTER);
+        gamePane.setCenter(this.boardRow);
+    }
+
+    public VBox getBoard() {
+        return this.boardRow;
     }
 
     public void sowFromAnimated(int startRow, int startCol, Duration stepDelay, Runnable onComplete) {
