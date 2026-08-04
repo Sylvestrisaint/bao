@@ -16,6 +16,7 @@ import java.util.Objects;
 
 public class Game {
     private PaneOrganizer paneOrganizer;
+    private Info infoPage;
     private Timeline timeline;
     private int timeInMinutes;
     private int timeInSeconds;
@@ -26,6 +27,7 @@ public class Game {
 
     public Game(PaneOrganizer paneOrganizer) {
         this.paneOrganizer = paneOrganizer;
+        this.infoPage = new Info();
         this.setupGame();
     }
 
@@ -56,27 +58,6 @@ public class Game {
 
         gamePane.setTop(topBar);
 
-        // Controls
-        VBox controls = new VBox();
-        controls.setAlignment(Pos.CENTER);
-        controls.setPadding(new Insets(30.0));
-        controls.setSpacing(12.0);
-
-        Button settings = new Button();
-        settings.getStyleClass().add("controls-button");
-        settings.setGraphic(this.loadImageView("/resources/settings.png"));
-
-        Button info = new Button();
-        info.getStyleClass().add("controls-button");
-        info.setGraphic(this.loadImageView("/resources/info.png"));
-
-        Button exit = new Button();
-        exit.getStyleClass().add("controls-button");
-        exit.setGraphic(this.loadImageView("/resources/exit.png"));
-
-        controls.getChildren().addAll(settings, info, exit);
-        gamePane.setLeft(controls);
-
         // Board
         Board board = new Board(this, gamePane);
 
@@ -102,6 +83,38 @@ public class Game {
         this.styleButton(start);
         bottomPane.getChildren().add(start);
         gamePane.setBottom(bottomPane);
+
+        // Controls
+        VBox controls = new VBox();
+        controls.setAlignment(Pos.CENTER);
+        controls.setPadding(new Insets(30.0));
+        controls.setSpacing(12.0);
+
+        Button settings = new Button();
+        settings.getStyleClass().add("controls-button");
+        settings.setCursor(Cursor.HAND);
+        settings.setGraphic(this.loadImageView("/resources/settings.png"));
+
+        Button info = new Button();
+        info.getStyleClass().add("controls-button");
+        info.setCursor(Cursor.HAND);
+        info.setOnAction(actionEvent -> {
+            this.turnLabel.setVisible(false);
+            this.timeLeft.setVisible(false);
+            bottomPane.setVisible(false);
+            this.infoPage.showScreen(gamePane);
+        });
+        info.setGraphic(this.loadImageView("/resources/info.png"));
+
+        Button exit = new Button();
+        exit.getStyleClass().add("controls-button");
+        exit.setId("exit");
+        exit.setOnAction(actionEvent -> System.exit(0));
+        exit.setCursor(Cursor.HAND);
+        exit.setGraphic(this.loadImageView("/resources/exit.png"));
+
+        controls.getChildren().addAll(settings, info, exit);
+        gamePane.setLeft(controls);
 
         this.paneOrganizer.showScreen(gamePane);
     }

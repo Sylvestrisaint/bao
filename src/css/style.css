@@ -19,6 +19,10 @@
     -fx-border-color: transparent;
 }
 
+#exit {
+    -fx-background-color: #810000;
+}
+
 .label-one {
     -fx-background-color: #381e00;
     -fx-label-padding: 6.0;
