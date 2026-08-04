@@ -95,6 +95,11 @@ public class Game {
         settings.setCursor(Cursor.HAND);
         settings.setGraphic(this.loadImageView("/resources/settings.png"));
 
+        Button back = new Button();
+        back.getStyleClass().add("controls-button");
+        back.setCursor(Cursor.HAND);
+        back.setGraphic(this.loadImageView("/resources/back.png"));
+
         Button info = new Button();
         info.getStyleClass().add("controls-button");
         info.setCursor(Cursor.HAND);
@@ -102,6 +107,7 @@ public class Game {
             this.turnLabel.setVisible(false);
             this.timeLeft.setVisible(false);
             bottomPane.setVisible(false);
+            topBar.setRight(back);
             this.infoPage.showScreen(gamePane);
         });
         info.setGraphic(this.loadImageView("/resources/info.png"));
