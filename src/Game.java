@@ -111,7 +111,7 @@ public class Game {
         info.getStyleClass().add("controls-button");
         info.setCursor(Cursor.HAND);
         info.setOnAction(actionEvent -> {
-            this.pauseGame();
+            if (this.gameHasStarted()) this.pauseGame();
             this.turnLabel.setVisible(false);
             bottomPane.setVisible(false);
             topBar.setRight(back);
@@ -205,6 +205,10 @@ public class Game {
 
     public boolean gameIsActive() {
         return this.isGameActive;
+    }
+
+    public boolean gameHasStarted() {
+        return this.timeline != null;
     }
 
     public void switchPlayer() {
