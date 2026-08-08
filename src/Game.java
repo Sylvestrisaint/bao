@@ -112,7 +112,7 @@ public class Game {
         info.getStyleClass().add("controls-button");
         info.setCursor(Cursor.HAND);
         info.setOnAction(actionEvent -> {
-            if (this.timeline.getStatus() == Animation.Status.RUNNING) this.pauseGame();
+            if (this.timeline != null && this.timeline.getStatus() == Animation.Status.RUNNING) this.pauseGame();
             this.turnLabel.setVisible(false);
             bottomPane.setVisible(false);
             topBar.setRight(back);
@@ -195,12 +195,10 @@ public class Game {
             this.pause.setText("PLAY");
             this.timeline.pause();
             this.turnLabel.setText("GAME PAUSED");
-            this.isGameActive = false;
         } else {
             this.pause.setText("PAUSE");
             this.turnLabel.setText("PLAYER " + this.currentPlayer + "'S TURN");
             this.timeline.play();
-            this.isGameActive = true;
         }
         this.isGameActive = !this.isGameActive;
     }
