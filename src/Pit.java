@@ -22,6 +22,10 @@ public class Pit {
     private final Tooltip tooltip;
     private final Circle highlightOverlay;
 
+    /**
+     * Represents a single pit on the board, responsible for tracking its own bead count
+     * and rendering itself, including bead imagery, overflow count, and click/flash animations.
+     */
     public Pit(int row, int col, int beadCount) {
         this.row = row;
         this.col = col;
@@ -55,11 +59,31 @@ public class Pit {
         this.setBeadCount(beadCount);
     }
 
+    /**
+     * Retrieves the visual node representing this pit.
+     * @return the pit's view
+     */
     public StackPane getView() { return view; }
+    /**
+     * Retrieves the row this pit occupies.
+     * @return row index
+     */
     public int getRow() { return this.row; }
+    /**
+     * Retrieves the column this pit occupies.
+     * @return column index
+     */
     public int getCol() { return this.col; }
+    /**
+     * Retrieves the current number of beads in this pit.
+     * @return bead count
+     */
     public int getBeadCount() { return this.beadCount; }
 
+    /**
+     * Updates the bead count for this pit and refreshes its visual to match.
+     * @param count - new bead count
+     */
     public void setBeadCount(int count) {
         this.beadCount = count;
         this.refreshVisual();
@@ -67,28 +91,43 @@ public class Pit {
 
     private Consumer<Pit> clickHandler;
 
+    /**
+     * Registers a handler to be notified whenever this pit is clicked.
+     * @param handler - callback to run with this pit as its argument
+     */
     public void setOnPitClicked(Consumer<Pit> handler) {
         this.clickHandler = handler;
     }
 
+    /**
+     * Sets the pit's bead count to reflect a capture and flashes it red to indicate beads were removed.
+     * @param newCount - bead count after the capture
+     */
     public void flashRemoved(int newCount) {
         this.setBeadCount(newCount);
         this.flash(Color.rgb(220, 40, 40, 0.45));
     }
+
+    /**
+     * Sets the pit's bead count to reflect a sow and flashes it green to indicate a bead was added.
+     * @param newCount - bead count after the bead is added
+     */
 
     public void flashAdded(int newCount) {
         this.setBeadCount(newCount);
         this.flash(Color.rgb(40, 180, 80, 0.45));
     }
 
+    /**
+     * Flashes the pit gray to indicate an invalid move was attempted on it.
+     */
     public void flashInvalid() {
         this.flash(Color.GRAY);
     }
 
-//    public void flashValid() {
-//        this.flash(Color.PINK);
-//    }
-//
+    /**
+     * Flashes a yellow outline around the pit to indicate it's a valid move for the current player.
+     */
     public void flashValid() {
         this.highlightOverlay.setFill(Color.TRANSPARENT);
         this.highlightOverlay.setStroke(Color.LIGHTYELLOW);
@@ -101,6 +140,10 @@ public class Pit {
         fade.play();
     }
 
+    /**
+     * Fades the highlight overlay in and out using the given color. Shared by the flash methods to avoid duplicating the fade animation setup.
+     * @param color - color to flash the overlay
+     */
     private void flash(Color color) {
         this.highlightOverlay.setFill(color);
         this.highlightOverlay.setStroke(Color.TRANSPARENT);
@@ -112,6 +155,11 @@ public class Pit {
         fade.play();
     }
 
+    /**
+     * Updates the pit's bead image, overflow label, and tooltip to match its
+     * current bead count. Beads beyond MAX_BEADS are shown as a capped image
+     * with the overflow count layered on top.
+     */
     private void refreshVisual() {
         int index = Math.min(this.beadCount, MAX_BEADS);
         this.beadImageView.setImage(BEADS[index]);

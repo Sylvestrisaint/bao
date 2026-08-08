@@ -29,16 +29,24 @@ public class Board {
     private int playerTwoBeads;
     private int currentPlayer = 1;
 
+    /**
+     * Initializes the board and establishes each player's path.
+     * @param gamePane The root layout pane where the board will be rendered.
+     */
     public Board(Game gamePlay, BorderPane gamePane) {
         this.gamePlay = gamePlay;
         this.playerOneBeads = 32;
         this.playerTwoBeads = 32;
-        this.setupBoardWithPits(gamePane);
+        this.setupBoardWithLabels(gamePane);
         this.playerOnePath = this.buildPath(0, 1);
         this.playerTwoPath = this.buildPath(2, 3);
     }
 
-    private void setupBoardWithPits(BorderPane gamePane) {
+    /**
+     * Setups the board with two beads in each pit and labels for players on each side.
+     * @param gamePane The root layout pane where the board will be rendered.
+     */
+    private void setupBoardWithLabels(BorderPane gamePane) {
         Image image = new Image(this.getClass().getResourceAsStream("/resources/board.png"));
         ImageView boardImageView = new ImageView(image);
         boardImageView.setFitWidth(Constants.BOARD_WIDTH);
@@ -102,11 +110,24 @@ public class Board {
         gamePane.setCenter(this.boardRow);
     }
 
+    /**
+     * Retrieves the board in its current state
+     * @return bao board with its labels
+     */
     public VBox getBoard() {
         return this.boardRow;
     }
 
-    public void sowFromAnimated(int startRow, int startCol, Duration stepDelay, Runnable onComplete) {
+    /**
+     * Animates capture and sowing within the current player's valid path. Capture only if the
+     * current pit is an inner pit (row 1 or 2) containing at least two beads and was reached
+     * by sowing.
+     * @param startRow - starting row
+     * @param startCol - starting column
+     * @param stepDelay - transition delay in sowing animation from one pit to the next
+     * @param onComplete - what's to happen when sowing is done?
+     */
+    public void sowFrom(int startRow, int startCol, Duration stepDelay, Runnable onComplete) {
         List<int[]> path = this.getPathForRow(startRow);
         int index = this.indexOf(path, startRow, startCol);
 
@@ -120,10 +141,10 @@ public class Board {
             if (this.currentPlayer == 1) {
                 isPlayerOne = true;
                 oppPitOne = this.pits[startRow + 1][startCol];
-                oppPitTwo = this.pits[startRow + 1][startCol];
+                oppPitTwo = this.pits[startRow + 2][startCol];
             } else {
                 oppPitOne = this.pits[startRow - 1][startCol];
-                oppPitTwo = this.pits[startRow - 1][startCol];
+                oppPitTwo = this.pits[startRow - 2][startCol];
             }
 
             if (oppPitOne.getBeadCount() != 0) {
@@ -164,7 +185,7 @@ public class Board {
         sequence.setOnFinished(e -> {
             if (onComplete != null) {
                 if (lastPitHolder[0].getBeadCount() != 1) {
-                    sowFromAnimated(lastPitHolder[0].getRow(), lastPitHolder[0].getCol(), Duration.millis(250), ()-> {
+                    sowFrom(lastPitHolder[0].getRow(), lastPitHolder[0].getCol(), Duration.millis(250), ()-> {
                         this.isSowInProgress = false;
                         this.switchTurn();
                     });
@@ -177,6 +198,11 @@ public class Board {
         sequence.play();
     }
 
+    /**
+     * Event listener for each pit on the board. Sowing is allowed only when the game is active,
+     * there is no sowing in progress, and the clicked pit is on the current player's side.
+     * @param pit - clicked pit
+     */
     private void handlePitClicked(Pit pit) {
         this.isPitClicked = true;
         if (!gamePlay.gameIsActive() || this.isSowInProgress) {
@@ -190,12 +216,15 @@ public class Board {
 
         this.isSowInProgress = true;
 
-        this.sowFromAnimated(pit.getRow(), pit.getCol(), Duration.millis(250), () -> {
+        this.sowFrom(pit.getRow(), pit.getCol(), Duration.millis(250), () -> {
             this.isSowInProgress = false;
             this.switchTurn();
         });
     }
 
+    /**
+     * Flashes all pits with at least one bead on the current player's side.
+     */
     public void flashPits() {
         int rowBoundary;
         if (this.currentPlayer == 1) {
@@ -212,6 +241,12 @@ public class Board {
         }
     }
 
+    /**
+     * Checks whether a player's move is valid. A move is valid if the clicked pit has at least one
+     * bead and is on the player's side.
+     * @param pit - clicked pit
+     * @return whether the move is valid or not
+     */
     private boolean isValidMove(Pit pit) {
         if (pit.getBeadCount() == 0) {
             return false;
@@ -226,6 +261,9 @@ public class Board {
         return true;
     }
 
+    /**
+     * Switches turns between players with a slight delay to make the last move more noticeable.
+     */
     private void switchTurn() {
         this.currentPlayer = (this.currentPlayer == 1) ? 2 : 1;
         gamePlay.switchPlayer();
@@ -235,6 +273,11 @@ public class Board {
         scheduler.shutdown();
     }
 
+    /**
+     * Updates bead counts for each player on the board whenever a capture occurs
+     * @param isPlayerOne - was the capture by player one or two?
+     * @param count - number of beads captured
+     */
     private void updateBeadCounts(boolean isPlayerOne, int count) {
         if (isPlayerOne) {
             this.playerOneBeads += count;
@@ -248,6 +291,13 @@ public class Board {
         this.playerTwoCountLabel.setText(String.valueOf(this.playerTwoBeads));
     }
 
+    /**
+     * Establishes an anticlockwise path for a player, starting from the rightmost pit
+     * of their top row, wrapping into their bottom row from left to right.
+     * @param topRow - player's top row
+     * @param bottomRow - player's bottom row
+     * @return the ordered list of {row, col} coordinates that make up the player's path
+     */
     private List<int[]> buildPath(int topRow, int bottomRow) {
         List<int[]> path = new ArrayList<>();
 
@@ -262,10 +312,23 @@ public class Board {
         return path;
     }
 
+    /**
+     * Determines which player's path a given row belongs to.
+     * @param row - the row to check
+     * @return player one's path if the row is 0 or 1, otherwise player two's path
+     */
     private List<int[]> getPathForRow(int row) {
         return (row < 2) ? this.playerOnePath : this.playerTwoPath;
     }
 
+    /**
+     * Finds the position of a pit within a given path.
+     * @param path - the path to search
+     * @param row - row of the pit being searched for
+     * @param col - column of the pit being searched for
+     * @return the index of the pit in the path
+     * @throws IllegalStateException if the pit isn't found in the path
+     */
     private int indexOf(List<int[]> path, int row, int col) {
         for (int i = 0; i < path.size(); i++) {
             if (path.get(i)[0] == row && path.get(i)[1] == col) {

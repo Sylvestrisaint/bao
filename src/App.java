@@ -14,8 +14,8 @@ public class App extends Application {
         stage.setMinHeight(Constants.PANE_HEIGHT);
         stage.setScene(scene);
         stage.setTitle("BAO");
-//        Image appIcon = new Image(getClass().getResourceAsStream("resources/icon.png"));
-//        stage.getIcons().add(appIcon);
+        Image appIcon = new Image(getClass().getResourceAsStream("resources/icon.png"));
+        stage.getIcons().add(appIcon);
         stage.show();
     }
 

@@ -26,17 +26,21 @@ public class Game {
     private int currentPlayer;
     private boolean isGameActive = false;
 
+    /**
+     * Instantiates a new standard human vs human game.
+     * @param paneOrganizer The screen manager used to switch between different pages.
+     */
     public Game(PaneOrganizer paneOrganizer) {
         this.paneOrganizer = paneOrganizer;
-        this.setupGame();
+        this.setupGameView();
     }
 
-    private void setupGame() {
+    /**
+     * Sets up the initial game state i.e board, timer, and control buttons.
+     */
+    private void setupGameView() {
         BorderPane gamePane = new BorderPane();
-        this.setupBoard(gamePane);
-    }
 
-    private void setupBoard(BorderPane gamePane) {
         // Header
         BorderPane topBar = new BorderPane();
         topBar.setPadding(new Insets(20.0));
@@ -93,7 +97,7 @@ public class Game {
         Button back = new Button();
         back.getStyleClass().add("controls-button");
         back.setCursor(Cursor.HAND);
-        back.setGraphic(this.loadImageView("/resources/back.png"));
+        back.setGraphic(this.loadIcon("/resources/back.png"));
         back.setOnAction(actionEvent -> {
             this.turnLabel.setVisible(true);
             topBar.setRight(this.timeLeft);
@@ -105,26 +109,26 @@ public class Game {
         settings.getStyleClass().add("controls-button");
         settings.setCursor(Cursor.HAND);
         settings.setOnAction(actionEvent -> {
-            displayControlsPage(topBar, bottomBar, back);
-            gamePane.setCenter(showSettingsPage());
+            prepControlsPage(topBar, bottomBar, back);
+            gamePane.setCenter(loadPage("/resources/settings-page.png"));
         });
-        settings.setGraphic(this.loadImageView("/resources/settings.png"));
+        settings.setGraphic(this.loadIcon("/resources/settings.png"));
 
         Button info = new Button();
         info.getStyleClass().add("controls-button");
         info.setCursor(Cursor.HAND);
         info.setOnAction(actionEvent -> {
-            displayControlsPage(topBar, bottomBar, back);
-            gamePane.setCenter(showInfoPage());
+            prepControlsPage(topBar, bottomBar, back);
+            gamePane.setCenter(loadPage("/resources/info-page.png"));
         });
-        info.setGraphic(this.loadImageView("/resources/info.png"));
+        info.setGraphic(this.loadIcon("/resources/info.png"));
 
         Button exit = new Button();
         exit.getStyleClass().add("controls-button");
         exit.setId("exit");
         exit.setOnAction(actionEvent -> System.exit(0));
         exit.setCursor(Cursor.HAND);
-        exit.setGraphic(this.loadImageView("/resources/exit.png"));
+        exit.setGraphic(this.loadIcon("/resources/exit.png"));
 
         controls.getChildren().addAll(settings, info, exit);
         gamePane.setLeft(controls);
@@ -132,32 +136,38 @@ public class Game {
         this.paneOrganizer.showScreen(gamePane);
     }
 
-    private void displayControlsPage(BorderPane topBar, HBox bottomBar, Button back) {
+    /**
+     * Pauses the current game and hides the top and bottom bar
+     * @param topBar - pane consisting of the header, player turn label, and timer
+     * @param bottomBar - HBox containing the start/restart buttons
+     * @param back - back navigation button
+     */
+    private void prepControlsPage(BorderPane topBar, HBox bottomBar, Button back) {
         if (this.timeline != null && this.timeline.getStatus() == Animation.Status.RUNNING) this.pauseGame();
         this.turnLabel.setVisible(false);
         bottomBar.setVisible(false);
         topBar.setRight(back);
     }
 
-    private HBox loadPage(String path, Integer width, Integer height) {
+    /**
+     * Loads the image from path and adds it to a layout pane
+     * @param path - image path
+     * @return layout pane containing the loaded image
+     */
+    private HBox loadPage(String path) {
         HBox pane = new HBox();
         Image image = new Image(this.getClass().getResourceAsStream(path));
         ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(width);
-        imageView.setFitHeight(height);
+        imageView.setFitWidth(Constants.PAGE_WIDTH);
+        imageView.setFitHeight(Constants.PAGE_HEIGHT);
         pane.setAlignment(Pos.CENTER);
         pane.getChildren().add(imageView);
         return pane;
     }
 
-    private HBox showInfoPage() {
-        return loadPage("/resources/info-page.png", Constants.INFO_WIDTH, Constants.INFO_HEIGHT);
-    }
-
-    private HBox showSettingsPage() {
-        return loadPage("/resources/settings-page.png", Constants.SETTINGS_WIDTH, Constants.SETTINGS_HEIGHT);
-    }
-
+    /**
+     * Starts the timer at the beginning of a new game
+     */
     private void startTimer() {
         this.timeInMinutes = 9;
         this.timeInSeconds = 60;
@@ -183,13 +193,23 @@ public class Game {
         this.timeline.play();
     }
 
-    private void endGame() {}
+    /**
+     * Ends game and displays winner
+     */
+    private void endGame() {
 
+    }
+
+    /**
+     * Display the restart button when a new game begins
+     * @param start - start button
+     * @param bottomPane - layout pane containing the start button
+     */
     private void showRestart(Button start, HBox bottomPane) {
         Button restart = new Button("RESTART");
         restart.setOnAction(actionEvent -> {
             this.timeline.stop();
-            this.setupGame();
+            this.setupGameView();
         });
         restart.setCursor(Cursor.HAND);
         this.styleButton(restart);
@@ -204,6 +224,9 @@ public class Game {
         bottomPane.getChildren().addAll(this.pause, restart);
     }
 
+    /**
+     * Pauses an ongoing game and plays a paused game
+     */
     private void pauseGame() {
         if (this.gameIsActive()) {
             this.pause.setText("PLAY");
@@ -217,16 +240,28 @@ public class Game {
         this.isGameActive = !this.isGameActive;
     }
 
+    /**
+     * Checks whether the current game is active i.e has begun and is not paused
+     * @return whether the game is active or not
+     */
     public boolean gameIsActive() {
         return this.isGameActive;
     }
 
+    /**
+     * Switches turns between players and updates the appropriate labels
+     */
     public void switchPlayer() {
         this.currentPlayer = (this.currentPlayer == 1) ? 2 : 1;
         this.turnLabel.setText("PLAYER " + this.currentPlayer +"'S TURN");
     }
 
-    private ImageView loadImageView(String path) {
+    /**
+     * Loads icons used in control buttons
+     * @param path - image path
+     * @return ImageView used as graphic on respective buttons
+     */
+    private ImageView loadIcon(String path) {
         Image icon = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream(path)));
         ImageView iconImageView = new ImageView(icon);
         iconImageView.setFitWidth(30);
@@ -234,6 +269,11 @@ public class Game {
         return iconImageView;
     }
 
+    /**
+     * Loads imported font
+     * @param size - font size
+     * @return sized font
+     */
     public static Font loadFont(int size) {
         Font customFont = Font.loadFont(Game.class.
                 getResourceAsStream("fonts/noot-regular.ttf"),size);
