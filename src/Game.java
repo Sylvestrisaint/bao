@@ -17,7 +17,6 @@ import java.util.Objects;
 
 public class Game {
     private PaneOrganizer paneOrganizer;
-    private Info infoPage;
     private Button pause;
     private Timeline timeline;
     private int timeInMinutes;
@@ -29,7 +28,6 @@ public class Game {
 
     public Game(PaneOrganizer paneOrganizer) {
         this.paneOrganizer = paneOrganizer;
-        this.infoPage = new Info();
         this.setupGame();
     }
 
@@ -69,33 +67,28 @@ public class Game {
         gamePane.setRight(rightSpacer);
 
         // Start/Restart button
-        HBox bottomPane = new HBox();
-        bottomPane.setAlignment(Pos.CENTER);
-        bottomPane.setPadding(new Insets(18.0));
+        HBox bottomBar = new HBox();
+        bottomBar.setAlignment(Pos.CENTER);
+        bottomBar.setPadding(new Insets(18.0));
         Button start = new Button("START");
         start.setOnAction(actionEvent -> {
             this.isGameActive = true;
             this.currentPlayer = 1;
             this.startTimer();
-            this.showRestart(start, bottomPane);
+            this.showRestart(start, bottomBar);
             this.turnLabel.setText("PLAYER " + this.currentPlayer + "'s TURN");
             board.flashPits();
         } );
         start.setCursor(Cursor.HAND);
         this.styleButton(start);
-        bottomPane.getChildren().add(start);
-        gamePane.setBottom(bottomPane);
+        bottomBar.getChildren().add(start);
+        gamePane.setBottom(bottomBar);
 
         // Controls
         VBox controls = new VBox();
         controls.setAlignment(Pos.CENTER);
         controls.setPadding(new Insets(30.0));
         controls.setSpacing(12.0);
-
-        Button settings = new Button();
-        settings.getStyleClass().add("controls-button");
-        settings.setCursor(Cursor.HAND);
-        settings.setGraphic(this.loadImageView("/resources/settings.png"));
 
         Button back = new Button();
         back.getStyleClass().add("controls-button");
@@ -104,18 +97,24 @@ public class Game {
         back.setOnAction(actionEvent -> {
             this.turnLabel.setVisible(true);
             topBar.setRight(this.timeLeft);
-            bottomPane.setVisible(true);
+            bottomBar.setVisible(true);
             gamePane.setCenter(board.getBoard());
         });
+
+        Button settings = new Button();
+        settings.getStyleClass().add("controls-button");
+        settings.setCursor(Cursor.HAND);
+        settings.setOnAction(actionEvent -> {
+            displayControlsPage(topBar, bottomBar, back);
+            gamePane.setCenter(showSettingsPage());
+        });
+        settings.setGraphic(this.loadImageView("/resources/settings.png"));
 
         Button info = new Button();
         info.getStyleClass().add("controls-button");
         info.setCursor(Cursor.HAND);
         info.setOnAction(actionEvent -> {
-            if (this.timeline != null && this.timeline.getStatus() == Animation.Status.RUNNING) this.pauseGame();
-            this.turnLabel.setVisible(false);
-            bottomPane.setVisible(false);
-            topBar.setRight(back);
+            displayControlsPage(topBar, bottomBar, back);
             gamePane.setCenter(showInfoPage());
         });
         info.setGraphic(this.loadImageView("/resources/info.png"));
@@ -133,15 +132,30 @@ public class Game {
         this.paneOrganizer.showScreen(gamePane);
     }
 
+    private void displayControlsPage(BorderPane topBar, HBox bottomBar, Button back) {
+        if (this.timeline != null && this.timeline.getStatus() == Animation.Status.RUNNING) this.pauseGame();
+        this.turnLabel.setVisible(false);
+        bottomBar.setVisible(false);
+        topBar.setRight(back);
+    }
+
+    private HBox loadPage(String path, Integer width, Integer height) {
+        HBox pane = new HBox();
+        Image image = new Image(this.getClass().getResourceAsStream(path));
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(Constants.SETTINGS_WIDTH);
+        imageView.setFitHeight(Constants.SETTINGS_HEIGHT);
+        pane.setAlignment(Pos.CENTER);
+        pane.getChildren().add(imageView);
+        return pane;
+    }
+
     private HBox showInfoPage() {
-        HBox infoPane = new HBox();
-        Image image = new Image(this.getClass().getResourceAsStream("/resources/info-page.png"));
-        ImageView infoImageView = new ImageView(image);
-        infoImageView.setFitWidth(Constants.INFO_WIDTH);
-        infoImageView.setFitHeight(Constants.INFO_HEIGHT);
-        infoPane.setAlignment(Pos.CENTER);
-        infoPane.getChildren().add(infoImageView);
-        return infoPane;
+        return loadPage("/resources/info-page.png", Constants.INFO_WIDTH, Constants.INFO_HEIGHT);
+    }
+
+    private HBox showSettingsPage() {
+        return loadPage("/resources/settings-page.png", Constants.SETTINGS_WIDTH, Constants.SETTINGS_HEIGHT);
     }
 
     private void startTimer() {
