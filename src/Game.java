@@ -143,8 +143,8 @@ public class Game {
         HBox pane = new HBox();
         Image image = new Image(this.getClass().getResourceAsStream(path));
         ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(Constants.SETTINGS_WIDTH);
-        imageView.setFitHeight(Constants.SETTINGS_HEIGHT);
+        imageView.setFitWidth(width);
+        imageView.setFitHeight(height);
         pane.setAlignment(Pos.CENTER);
         pane.getChildren().add(imageView);
         return pane;
