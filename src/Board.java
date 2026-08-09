@@ -119,6 +119,20 @@ public class Board {
     }
 
     /**
+     * Retrieve the number of beads on player 1's side
+     */
+    public int getPlayerOneBeadCount() {
+        return this.playerOneBeads;
+    }
+
+    /**
+     * Retrieve the number of beads on player 2's side
+     */
+    public int getPlayerTwoBeadCount() {
+        return this.playerTwoBeads;
+    }
+
+    /**
      * Animates capture and sowing within the current player's valid path. Capture only if the
      * current pit is an inner pit (row 1 or 2) containing at least two beads and was reached
      * by sowing.

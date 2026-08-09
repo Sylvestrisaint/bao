@@ -17,6 +17,7 @@ import java.util.Objects;
 
 public class Game {
     private PaneOrganizer paneOrganizer;
+    private BorderPane gamePane;
     private Button pause;
     private Timeline timeline;
     private int timeInMinutes;
@@ -32,6 +33,7 @@ public class Game {
      */
     public Game(PaneOrganizer paneOrganizer) {
         this.paneOrganizer = paneOrganizer;
+        this.gamePane = new BorderPane();
         this.setupGameView();
     }
 
@@ -39,7 +41,8 @@ public class Game {
      * Sets up the initial game state i.e board, timer, and control buttons.
      */
     private void setupGameView() {
-        BorderPane gamePane = new BorderPane();
+        // Board
+        Board board = new Board(this, this.gamePane);
 
         // Header
         BorderPane topBar = new BorderPane();
@@ -60,15 +63,30 @@ public class Game {
         this.timeLeft.setFont(loadFont(24));
         topBar.setRight(this.timeLeft);
 
-        gamePane.setTop(topBar);
+        KeyFrame timer = new KeyFrame(Duration.seconds(1), actionEvent -> {
+            if (this.timeInMinutes == 0 && this.timeInSeconds == 0) {
+                this.endGame(board);
+            }
 
-        // Board
-        Board board = new Board(this, gamePane);
+            if (this.timeInSeconds == 0) {
+                this.timeInSeconds = 60;
+                this.timeInMinutes -= 1;
+            }
+
+            this.timeInSeconds -= 1;
+            if (this.timeInSeconds < 10) {
+                this.timeLeft.setText(this.timeInMinutes + ":0" + this.timeInSeconds);
+            } else {
+                this.timeLeft.setText(this.timeInMinutes + ":" + this.timeInSeconds);
+            }
+        });
+
+        this.gamePane.setTop(topBar);
 
         // Spacer
         Pane rightSpacer = new Pane();
         rightSpacer.setPrefWidth(94);
-        gamePane.setRight(rightSpacer);
+        this.gamePane.setRight(rightSpacer);
 
         // Start/Restart button
         HBox bottomBar = new HBox();
@@ -78,15 +96,15 @@ public class Game {
         start.setOnAction(actionEvent -> {
             this.isGameActive = true;
             this.currentPlayer = 1;
-            this.startTimer();
-            this.showRestart(start, bottomBar);
+            this.startTimer(timer);
+            this.showRestart(bottomBar);
             this.turnLabel.setText("PLAYER " + this.currentPlayer + "'s TURN");
             board.flashPits();
         } );
         start.setCursor(Cursor.HAND);
         this.styleButton(start);
         bottomBar.getChildren().add(start);
-        gamePane.setBottom(bottomBar);
+        this.gamePane.setBottom(bottomBar);
 
         // Controls
         VBox controls = new VBox();
@@ -102,7 +120,7 @@ public class Game {
             this.turnLabel.setVisible(true);
             topBar.setRight(this.timeLeft);
             bottomBar.setVisible(true);
-            gamePane.setCenter(board.getBoard());
+            this.gamePane.setCenter(board.getBoard());
         });
 
         Button settings = new Button();
@@ -110,7 +128,7 @@ public class Game {
         settings.setCursor(Cursor.HAND);
         settings.setOnAction(actionEvent -> {
             prepControlsPage(topBar, bottomBar, back);
-            gamePane.setCenter(loadPage("/resources/settings-page.png"));
+            this.gamePane.setCenter(loadPage("/resources/settings-page.png"));
         });
         settings.setGraphic(this.loadIcon("/resources/settings.png"));
 
@@ -119,7 +137,7 @@ public class Game {
         info.setCursor(Cursor.HAND);
         info.setOnAction(actionEvent -> {
             prepControlsPage(topBar, bottomBar, back);
-            gamePane.setCenter(loadPage("/resources/info-page.png"));
+            this.gamePane.setCenter(loadPage("/resources/info-page.png"));
         });
         info.setGraphic(this.loadIcon("/resources/info.png"));
 
@@ -131,9 +149,9 @@ public class Game {
         exit.setGraphic(this.loadIcon("/resources/exit.png"));
 
         controls.getChildren().addAll(settings, info, exit);
-        gamePane.setLeft(controls);
+        this.gamePane.setLeft(controls);
 
-        this.paneOrganizer.showScreen(gamePane);
+        this.paneOrganizer.showScreen(this.gamePane);
     }
 
     /**
@@ -168,26 +186,9 @@ public class Game {
     /**
      * Starts the timer at the beginning of a new game
      */
-    private void startTimer() {
-        this.timeInMinutes = 9;
+    private void startTimer(KeyFrame timer) {
+        this.timeInMinutes = 1;
         this.timeInSeconds = 60;
-        KeyFrame timer = new KeyFrame(Duration.seconds(1), actionEvent -> {
-            if (this.timeInMinutes == 0 && this.timeInSeconds == 0) {
-                this.endGame();
-            }
-
-            if (this.timeInSeconds == 0) {
-                this.timeInSeconds = 60;
-                this.timeInMinutes -= 1;
-            }
-
-            this.timeInSeconds -= 1;
-            if (this.timeInSeconds < 10) {
-                this.timeLeft.setText(this.timeInMinutes + ":0" + this.timeInSeconds);
-            } else {
-                this.timeLeft.setText(this.timeInMinutes + ":" + this.timeInSeconds);
-            }
-        });
         this.timeline = new Timeline(timer);
         this.timeline.setCycleCount(Timeline.INDEFINITE);
         this.timeline.play();
@@ -196,16 +197,26 @@ public class Game {
     /**
      * Ends game and displays winner
      */
-    private void endGame() {
+    private void endGame(Board board) {
+        int countOne = board.getPlayerOneBeadCount();
+        int countTwo = board.getPlayerTwoBeadCount();
+        ImageView imgView;
+        if (countOne > countTwo) imgView = loadIcon("/resources/winner1.png");
+        else if (countTwo > countOne) imgView = loadIcon("/resources/winner2.png");
+        else imgView = loadIcon("/resources/tie.png");
 
+        StackPane stack = new StackPane();
+        StackPane prompt = new StackPane();
+        Label outcome = new Label(countOne + " : " + countTwo);
+        prompt.getChildren().addAll(imgView, outcome);
+        stack.getChildren().addAll(this.gamePane, prompt);
     }
 
     /**
      * Display the restart button when a new game begins
-     * @param start - start button
      * @param bottomPane - layout pane containing the start button
      */
-    private void showRestart(Button start, HBox bottomPane) {
+    private void showRestart(HBox bottomPane) {
         Button restart = new Button("RESTART");
         restart.setOnAction(actionEvent -> {
             this.timeline.stop();
@@ -257,9 +268,9 @@ public class Game {
     }
 
     /**
-     * Loads icons used in control buttons
+     * Loads resources used as icons in the controls section
      * @param path - image path
-     * @return ImageView used as graphic on respective buttons
+     * @return ImageView to be used as graphic on the buttons
      */
     private ImageView loadIcon(String path) {
         Image icon = new Image(Objects.requireNonNull(this.getClass().getResourceAsStream(path)));

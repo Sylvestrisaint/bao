@@ -141,7 +141,8 @@ public class Pit {
     }
 
     /**
-     * Fades the highlight overlay in and out using the given color. Shared by the flash methods to avoid duplicating the fade animation setup.
+     * Fades the highlight overlay in and out using the given color. Shared by the flash methods to
+     * avoid duplicating the fade animation setup.
      * @param color - color to flash the overlay
      */
     private void flash(Color color) {
