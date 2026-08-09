@@ -1,19 +1,20 @@
 .full-image-button {
-    -fx-background-image: url("/resources/button.png");
+    -fx-background-image: url("/resources/button-n.png");
     -fx-background-size: 100% 100%;
-    -fx-padding: 20px;
+    -fx-padding: 30px;
     -fx-background-color: transparent;
     -fx-border-color: transparent;
     -fx-background-repeat: no-repeat;
     -fx-background-position: center center;
-    -fx-pref-width: 150px;
+    -fx-pref-width: 200px;
+    -fx-pref-height: 80px;
 }
 
 .controls-button {
     -fx-background-color: #e2a868;
     -fx-min-width: 60px;
     -fx-min-height: 60px;
-    -fx-max-width: 60px;
+    -fx-max-width: 80px;
     -fx-max-height: 60px;
     -fx-background-radius: 50em;
     -fx-border-color: transparent;

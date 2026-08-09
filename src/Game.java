@@ -17,8 +17,11 @@ import java.util.Objects;
 
 public class Game {
     private PaneOrganizer paneOrganizer;
+    private Board board;
     private BorderPane gamePane;
+    private HBox bottomBar;
     private Button pause;
+    private Button restart;
     private Timeline timeline;
     private int timeInMinutes;
     private int timeInSeconds;
@@ -42,7 +45,7 @@ public class Game {
      */
     private void setupGameView() {
         // Board
-        Board board = new Board(this, this.gamePane);
+        this.board = new Board(this, this.gamePane);
 
         // Header
         BorderPane topBar = new BorderPane();
@@ -59,27 +62,9 @@ public class Game {
         topBar.setCenter(turnLabel);
 
         // Timer
-        this.timeLeft = new Label("10:00");
+        this.timeLeft = new Label(this.timeInMinutes + ":00");
         this.timeLeft.setFont(loadFont(24));
         topBar.setRight(this.timeLeft);
-
-        KeyFrame timer = new KeyFrame(Duration.seconds(1), actionEvent -> {
-            if (this.timeInMinutes == 0 && this.timeInSeconds == 0) {
-                this.endGame(board);
-            }
-
-            if (this.timeInSeconds == 0) {
-                this.timeInSeconds = 60;
-                this.timeInMinutes -= 1;
-            }
-
-            this.timeInSeconds -= 1;
-            if (this.timeInSeconds < 10) {
-                this.timeLeft.setText(this.timeInMinutes + ":0" + this.timeInSeconds);
-            } else {
-                this.timeLeft.setText(this.timeInMinutes + ":" + this.timeInSeconds);
-            }
-        });
 
         this.gamePane.setTop(topBar);
 
@@ -89,22 +74,22 @@ public class Game {
         this.gamePane.setRight(rightSpacer);
 
         // Start/Restart button
-        HBox bottomBar = new HBox();
-        bottomBar.setAlignment(Pos.CENTER);
-        bottomBar.setPadding(new Insets(18.0));
+        this.bottomBar = new HBox();
+        this.bottomBar.setAlignment(Pos.CENTER);
+        this.bottomBar.setPadding(new Insets(18.0));
         Button start = new Button("START");
         start.setOnAction(actionEvent -> {
             this.isGameActive = true;
             this.currentPlayer = 1;
-            this.startTimer(timer);
-            this.showRestart(bottomBar);
+            this.startTimer();
+            this.showPauseAndRestart();
             this.turnLabel.setText("PLAYER " + this.currentPlayer + "'s TURN");
             board.flashPits();
         } );
         start.setCursor(Cursor.HAND);
         this.styleButton(start);
-        bottomBar.getChildren().add(start);
-        this.gamePane.setBottom(bottomBar);
+        this.bottomBar.getChildren().add(start);
+        this.gamePane.setBottom(this.bottomBar);
 
         // Controls
         VBox controls = new VBox();
@@ -119,7 +104,7 @@ public class Game {
         back.setOnAction(actionEvent -> {
             this.turnLabel.setVisible(true);
             topBar.setRight(this.timeLeft);
-            bottomBar.setVisible(true);
+            this.bottomBar.setVisible(true);
             this.gamePane.setCenter(board.getBoard());
         });
 
@@ -127,8 +112,12 @@ public class Game {
         settings.getStyleClass().add("controls-button");
         settings.setCursor(Cursor.HAND);
         settings.setOnAction(actionEvent -> {
-            prepControlsPage(topBar, bottomBar, back);
-            this.gamePane.setCenter(loadPage("/resources/settings-page.png"));
+            prepControlsPage(topBar, back);
+            this.gamePane.setCenter(loadPage(
+                    "/resources/settings-page.png",
+                    Constants.PAGE_WIDTH,
+                    Constants.PAGE_HEIGHT
+            ));
         });
         settings.setGraphic(this.loadIcon("/resources/settings.png"));
 
@@ -136,8 +125,12 @@ public class Game {
         info.getStyleClass().add("controls-button");
         info.setCursor(Cursor.HAND);
         info.setOnAction(actionEvent -> {
-            prepControlsPage(topBar, bottomBar, back);
-            this.gamePane.setCenter(loadPage("/resources/info-page.png"));
+            prepControlsPage(topBar, back);
+            this.gamePane.setCenter(loadPage(
+                    "/resources/info-page.png",
+                    Constants.PAGE_WIDTH,
+                    Constants.PAGE_HEIGHT
+            ));
         });
         info.setGraphic(this.loadIcon("/resources/info.png"));
 
@@ -157,13 +150,12 @@ public class Game {
     /**
      * Pauses the current game and hides the top and bottom bar
      * @param topBar - pane consisting of the header, player turn label, and timer
-     * @param bottomBar - HBox containing the start/restart buttons
      * @param back - back navigation button
      */
-    private void prepControlsPage(BorderPane topBar, HBox bottomBar, Button back) {
+    private void prepControlsPage(BorderPane topBar, Button back) {
         if (this.timeline != null && this.timeline.getStatus() == Animation.Status.RUNNING) this.pauseGame();
         this.turnLabel.setVisible(false);
-        bottomBar.setVisible(false);
+        this.bottomBar.setVisible(false);
         topBar.setRight(back);
     }
 
@@ -172,12 +164,12 @@ public class Game {
      * @param path - image path
      * @return layout pane containing the loaded image
      */
-    private HBox loadPage(String path) {
+    private HBox loadPage(String path, int width, int height) {
         HBox pane = new HBox();
         Image image = new Image(this.getClass().getResourceAsStream(path));
         ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(Constants.PAGE_WIDTH);
-        imageView.setFitHeight(Constants.PAGE_HEIGHT);
+        imageView.setFitWidth(width);
+        imageView.setFitHeight(height);
         pane.setAlignment(Pos.CENTER);
         pane.getChildren().add(imageView);
         return pane;
@@ -186,8 +178,27 @@ public class Game {
     /**
      * Starts the timer at the beginning of a new game
      */
-    private void startTimer(KeyFrame timer) {
-        this.timeInMinutes = 1;
+    private void startTimer() {
+        KeyFrame timer = new KeyFrame(Duration.seconds(1), actionEvent -> {
+            if (this.timeInMinutes == 0 && this.timeInSeconds == 0) {
+                this.endGame();
+                return;
+            }
+
+            if (this.timeInSeconds == 0) {
+                this.timeInSeconds = 60;
+                this.timeInMinutes -= 1;
+            }
+
+            this.timeInSeconds -= 1;
+            if (this.timeInSeconds < 10) {
+                this.timeLeft.setText(this.timeInMinutes + ":0" + this.timeInSeconds);
+            } else {
+                this.timeLeft.setText(this.timeInMinutes + ":" + this.timeInSeconds);
+            }
+        });
+
+        this.timeInMinutes = 0;
         this.timeInSeconds = 60;
         this.timeline = new Timeline(timer);
         this.timeline.setCycleCount(Timeline.INDEFINITE);
@@ -197,34 +208,53 @@ public class Game {
     /**
      * Ends game and displays winner
      */
-    private void endGame(Board board) {
-        int countOne = board.getPlayerOneBeadCount();
-        int countTwo = board.getPlayerTwoBeadCount();
-        ImageView imgView;
-        if (countOne > countTwo) imgView = loadIcon("/resources/winner1.png");
-        else if (countTwo > countOne) imgView = loadIcon("/resources/winner2.png");
-        else imgView = loadIcon("/resources/tie.png");
+    private void endGame() {
+        this.timeline.stop();
+        this.turnLabel.setVisible(false);
+        this.bottomBar.getChildren().remove(this.pause);
+        this.restart.setText("PLAY AGAIN");
+
+        int countOne = this.board.getPlayerOneBeadCount();
+        int countTwo = this.board.getPlayerTwoBeadCount();
+        HBox promptPane;
+        if (countOne > countTwo) {
+            promptPane = loadPage(
+                    "/resources/winner1.png",
+                    Constants.PROMPT_WIDTH,
+                    Constants.PROMPT_HEIGHT);
+        }
+        else if (countTwo > countOne) {
+            promptPane = loadPage(
+                    "/resources/winner2.png",
+                    Constants.PROMPT_WIDTH,
+                    Constants.PROMPT_HEIGHT);
+        }
+        else {
+            promptPane = loadPage(
+                    "/resources/tie.png",
+                    Constants.PROMPT_WIDTH,
+                    Constants.PROMPT_HEIGHT);
+        }
 
         StackPane stack = new StackPane();
-        StackPane prompt = new StackPane();
         Label outcome = new Label(countOne + " : " + countTwo);
-        prompt.getChildren().addAll(imgView, outcome);
-        stack.getChildren().addAll(this.gamePane, prompt);
+        outcome.setFont(loadFont(24));
+        stack.getChildren().addAll(promptPane, outcome);
+        this.gamePane.setCenter(stack);
     }
 
     /**
-     * Display the restart button when a new game begins
-     * @param bottomPane - layout pane containing the start button
+     * Display the pause and restart buttons when a new game begins
      */
-    private void showRestart(HBox bottomPane) {
-        Button restart = new Button("RESTART");
-        restart.setOnAction(actionEvent -> {
+    private void showPauseAndRestart() {
+        this.restart = new Button("RESTART");
+        this.restart.setOnAction(actionEvent -> {
             this.timeline.stop();
             this.setupGameView();
         });
-        restart.setCursor(Cursor.HAND);
-        this.styleButton(restart);
-        bottomPane.getChildren().clear();
+        this.restart.setCursor(Cursor.HAND);
+        this.styleButton(this.restart);
+        this.bottomBar.getChildren().clear();
 
         this.pause = new Button("PAUSE");
         this.pause.setCursor(Cursor.HAND);
@@ -232,7 +262,7 @@ public class Game {
         this.pause.setOnAction(actionEvent -> {
             this.pauseGame();
         });
-        bottomPane.getChildren().addAll(this.pause, restart);
+        this.bottomBar.getChildren().addAll(this.pause, restart);
     }
 
     /**
@@ -240,7 +270,7 @@ public class Game {
      */
     private void pauseGame() {
         if (this.gameIsActive()) {
-            this.pause.setText("PLAY");
+            this.pause.setText("RESUME");
             this.timeline.pause();
             this.turnLabel.setText("GAME PAUSED");
         } else {

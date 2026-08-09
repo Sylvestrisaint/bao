@@ -5,6 +5,8 @@ public class Constants {
     public static final int BOARD_WIDTH = 808;
     public static final int PAGE_HEIGHT = 550;
     public static final int PAGE_WIDTH = 850;
+    public static final int PROMPT_HEIGHT = 250;
+    public static final int PROMPT_WIDTH = 500;
     public static final String PLAYER_ONE_COLOR = "#381e00";
     public static final String PLAYER_TWO_COLOR = "#4d0000";
 }
