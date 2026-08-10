@@ -198,8 +198,8 @@ public class Game {
             }
         });
 
-        this.timeInMinutes = 0;
-        this.timeInSeconds = 60;
+        this.timeInMinutes = 10;
+        this.timeInSeconds = 0;
         this.timeline = new Timeline(timer);
         this.timeline.setCycleCount(Timeline.INDEFINITE);
         this.timeline.play();
